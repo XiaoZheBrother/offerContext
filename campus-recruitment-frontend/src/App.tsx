@@ -4,6 +4,8 @@ import { useWindowWidth } from '@/hooks/useWindowWidth';
 import { MIN_PC_WIDTH } from '@/utils/constants';
 import AnnouncementList from '@/pages/AnnouncementList';
 import AnnouncementDetail from '@/pages/AnnouncementDetail';
+import Login from '@/pages/admin/Login';
+import Dashboard from '@/pages/admin/Dashboard';
 
 function MobileGuard() {
   const { isPC } = useWindowWidth();
@@ -53,11 +55,11 @@ const router = createBrowserRouter([
       { path: '/', element: <Navigate to="/announcements" replace /> },
       { path: '/announcements', element: <AnnouncementList /> },
       { path: '/announcements/:id', element: <AnnouncementDetail /> },
-      { path: '/admin/login', element: <Placeholder title="管理员登录" /> },
+      { path: '/admin/login', element: <Login /> },
       {
         element: <AdminRoute />,
         children: [
-          { path: '/admin', element: <Placeholder title="数据概览" /> },
+          { path: '/admin', element: <Dashboard /> },
           { path: '/admin/announcements', element: <Placeholder title="公告管理" /> },
         ],
       },
