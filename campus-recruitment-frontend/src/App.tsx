@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider, Navigate, Outlet } from 'react-rou
 import { useAuthStore } from '@/store/auth';
 import { useWindowWidth } from '@/hooks/useWindowWidth';
 import { MIN_PC_WIDTH } from '@/utils/constants';
+import AnnouncementList from '@/pages/AnnouncementList';
 
 function MobileGuard() {
   const { isPC } = useWindowWidth();
@@ -49,7 +50,7 @@ const router = createBrowserRouter([
     element: <MobileGuard />,
     children: [
       { path: '/', element: <Navigate to="/announcements" replace /> },
-      { path: '/announcements', element: <Placeholder title="校招公告列表" /> },
+      { path: '/announcements', element: <AnnouncementList /> },
       { path: '/announcements/:id', element: <Placeholder title="公告详情" /> },
       { path: '/admin/login', element: <Placeholder title="管理员登录" /> },
       {
