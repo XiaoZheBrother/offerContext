@@ -2,10 +2,12 @@ package com.campus.recruitment.dto.request;
 
 import lombok.Data;
 import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
+@Valid
 public class AnnouncementCreateRequest {
     @NotBlank private String companyName;
     @NotBlank private String name;
@@ -21,4 +23,12 @@ public class AnnouncementCreateRequest {
     @NotBlank private String applyLink;  // from_url field value
     private Short onlineStatus = 0;  // Default offline
     private LocalDate createdAt;     // 发布日期, edit keeps original
+
+    @AssertTrue(message = "网申开始日期不能晚于网申截止日期")
+    public boolean isDateRangeValid() {
+        if (publishedAt == null || expiredAt == null) {
+            return true;
+        }
+        return !publishedAt.isAfter(expiredAt);
+    }
 }
