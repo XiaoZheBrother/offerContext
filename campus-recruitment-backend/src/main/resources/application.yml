@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: campus-recruitment-backend
+  profiles:
+    active: dev
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+jwt:
+  secret: campus-recruitment-jwt-secret-key-change-in-production-2026
+  expiration: 86400000
+
+logging:
+  level:
+    root: INFO
+    com.campus.recruitment: DEBUG
