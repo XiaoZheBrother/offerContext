@@ -26,6 +26,9 @@ dist/
 .env.test.local
 .env.production.local
 
+# Project SSH
+.ssh/
+
 # OS
 .DS_Store
 Thumbs.db
