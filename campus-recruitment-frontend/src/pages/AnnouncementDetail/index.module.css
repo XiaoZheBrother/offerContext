@@ -1,0 +1,155 @@
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.content {
+  background: #fff;
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.companyName {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.announcementName {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1d1d1f;
+  margin-bottom: 8px;
+}
+
+.statusTag {
+  margin-left: 8px;
+}
+
+.notStartedBanner {
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+  border-radius: 4px;
+  padding: 8px 16px;
+  margin-bottom: 16px;
+  color: #d46b08;
+  font-size: 14px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.infoLabel {
+  font-size: 13px;
+  color: #999;
+}
+
+.infoValue {
+  font-size: 14px;
+  color: #1d1d1f;
+}
+
+.tagsSection {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.tagGroup {
+  margin-bottom: 12px;
+}
+
+.tagLabel {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 4px;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.detailSection {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d1d1f;
+  margin-bottom: 12px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-top: 24px;
+}
+
+.applyButton {
+  min-width: 160px;
+  height: 44px;
+  font-size: 16px;
+}
+
+.linkButton {
+  height: 44px;
+  font-size: 14px;
+}
+
+.emailModalContent {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.emailAddress {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1677ff;
+  margin: 16px 0;
+  word-break: break-all;
+  user-select: all;
+}
+
+.emailHint {
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.skeleton {
+  background: #fff;
+  border-radius: 8px;
+  padding: 32px;
+}
+
+.errorState {
+  padding: 64px 0;
+  text-align: center;
+}
