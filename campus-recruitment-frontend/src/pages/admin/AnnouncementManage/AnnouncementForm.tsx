@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { Drawer, Form, Input, Select, DatePicker, Radio, Button, message } from 'antd';
 import dayjs from 'dayjs';
-import { createAnnouncement, updateAnnouncement } from '@/services/admin';
-import { getAnnouncementDetail } from '@/services/announcement';
+import { createAnnouncement, updateAnnouncement, getAdminAnnouncementDetail } from '@/services/admin';
 import type { FilterOptionsResponse } from '@/types/announcement';
 import type { AnnouncementCreateRequest } from '@/types/announcement';
 
@@ -19,16 +18,16 @@ export default function AnnouncementForm({ open, editId, filterOptions, onClose,
 
   useEffect(() => {
     if (open && editId) {
-      getAnnouncementDetail(editId).then((data) => {
+      getAdminAnnouncementDetail(editId).then((data) => {
         form.setFieldsValue({
           companyName: data.companyName,
           name: data.name,
           detail: data.detail,
           link: data.link,
           applyLink: data.fromUrl,
-          classTypeIds: [],
-          campusTypeIds: [],
-          cityIds: [],
+          classTypeIds: data.classTypeIds ?? [],
+          campusTypeIds: data.campusTypeIds ?? [],
+          cityIds: data.cityIds ?? [],
           publishedAt: data.publishedAt ? dayjs(data.publishedAt) : undefined,
           expiredAt: data.expiredAt ? dayjs(data.expiredAt) : undefined,
           onlineStatus: 1,

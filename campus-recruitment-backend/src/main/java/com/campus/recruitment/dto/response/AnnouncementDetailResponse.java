@@ -15,6 +15,9 @@ public class AnnouncementDetailResponse {
     private List<String> classTypeNames;
     private List<String> campusTypeNames;
     private List<String> cityNames;
+    private List<Integer> classTypeIds;
+    private List<Integer> campusTypeIds;
+    private List<Integer> cityIds;
     private List<String> degreeNames;
     private List<String> industryTypeNames;
     private List<String> jobCategoryNames;

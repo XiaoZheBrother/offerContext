@@ -3,6 +3,7 @@ package com.campus.recruitment.service;
 import com.campus.recruitment.common.PageResponse;
 import com.campus.recruitment.dto.ApplyStatus;
 import com.campus.recruitment.dto.request.AnnouncementCreateRequest;
+import com.campus.recruitment.dto.response.AnnouncementDetailResponse;
 import com.campus.recruitment.dto.response.AnnouncementListResponse;
 import com.campus.recruitment.entity.*;
 import com.campus.recruitment.exception.ResourceNotFoundException;
@@ -353,6 +354,9 @@ public class AdminAnnouncementService {
                     // Apply status
                     dto.setApplyStatus(ApplyStatus.calculate(announcement.getPublishedAt(), announcement.getExpiredAt()));
 
+                    // Online status
+                    dto.setOnlineStatus(announcement.getOnlineStatus());
+
                     // ExpiredAt - use publishedAt + 90 days as default if null
                     if (announcement.getExpiredAt() != null) {
                         dto.setExpiredAt(announcement.getExpiredAt().toLocalDate());
@@ -369,5 +373,74 @@ public class AdminAnnouncementService {
                 .collect(Collectors.toList());
 
         return PageResponse.of(list, pageResult.getTotalElements(), page, size);
+    }
+
+    public AnnouncementDetailResponse getAnnouncementDetail(Integer id) {
+        Announcement announcement = announcementRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Announcement not found with id: " + id));
+
+        AnnouncementDetailResponse response = new AnnouncementDetailResponse();
+        response.setAnnouncementId(announcement.getAnnouncementId());
+        response.setName(announcement.getName());
+        response.setDetail(announcement.getDetail());
+        response.setFromUrl(announcement.getFromUrl());
+        response.setLink(announcement.getLink());
+        response.setSalary(announcement.getSalary());
+        response.setCompanyWelfare(announcement.getCompanyWelfare());
+        response.setClassTime(announcement.getClassTime());
+        response.setWrittenTest(announcement.getWrittenTest() != null && announcement.getWrittenTest() == 1);
+        response.setAcceptWorkExperience(announcement.getAcceptWorkExperience() != null && announcement.getAcceptWorkExperience() == 1);
+
+        if (announcement.getPublishedAt() != null) {
+            response.setPublishedAt(announcement.getPublishedAt().toLocalDate());
+        }
+        if (announcement.getExpiredAt() != null) {
+            response.setExpiredAt(announcement.getExpiredAt().toLocalDate());
+        } else if (announcement.getPublishedAt() != null) {
+            response.setExpiredAt(announcement.getPublishedAt().plusDays(90).toLocalDate());
+        }
+        if (announcement.getCreatedAt() != null) {
+            response.setCreatedAt(announcement.getCreatedAt().toLocalDate());
+        }
+
+        response.setApplyStatus(ApplyStatus.calculate(announcement.getPublishedAt(), announcement.getExpiredAt()));
+
+        // Company
+        if (announcement.getCompanyId() != null) {
+            companyRepository.findById(announcement.getCompanyId()).ifPresent(company -> {
+                response.setCompanyName(company.getName());
+            });
+        }
+
+        // Dimension IDs and names
+        Map<Integer, String> cityMap = cityRepository.findAll().stream()
+                .collect(Collectors.toMap(City::getCityId, City::getName));
+        Map<Integer, String> classTypeMap = classTypeRepository.findAll().stream()
+                .collect(Collectors.toMap(ClassType::getClassTypeId, ClassType::getName));
+        Map<Integer, String> campusTypeMap = campusTypeRepository.findAll().stream()
+                .collect(Collectors.toMap(CampusType::getCampusTypeId, CampusType::getName));
+
+        List<Integer> cityIds = announcementCityRepository.findCityIdsByAnnouncementId(id);
+        response.setCityIds(cityIds);
+        response.setCityNames(cityIds.stream()
+                .map(cid -> cityMap.getOrDefault(cid, ""))
+                .filter(name -> !name.isEmpty())
+                .collect(Collectors.toList()));
+
+        List<Integer> classTypeIds = announcementClassTypeRepository.findClassTypeIdsByAnnouncementId(id);
+        response.setClassTypeIds(classTypeIds);
+        response.setClassTypeNames(classTypeIds.stream()
+                .map(ctid -> classTypeMap.getOrDefault(ctid, ""))
+                .filter(name -> !name.isEmpty())
+                .collect(Collectors.toList()));
+
+        List<Integer> campusTypeIds = announcementCampusTypeRepository.findCampusTypeIdsByAnnouncementId(id);
+        response.setCampusTypeIds(campusTypeIds);
+        response.setCampusTypeNames(campusTypeIds.stream()
+                .map(ctid -> campusTypeMap.getOrDefault(ctid, ""))
+                .filter(name -> !name.isEmpty())
+                .collect(Collectors.toList()));
+
+        return response;
     }
 }

@@ -3,6 +3,7 @@ package com.campus.recruitment.controller.admin;
 import com.campus.recruitment.common.ApiResponse;
 import com.campus.recruitment.common.PageResponse;
 import com.campus.recruitment.dto.request.AnnouncementCreateRequest;
+import com.campus.recruitment.dto.response.AnnouncementDetailResponse;
 import com.campus.recruitment.dto.response.AnnouncementListResponse;
 import com.campus.recruitment.service.AdminAnnouncementService;
 import jakarta.validation.Valid;
@@ -40,6 +41,12 @@ public class AdminAnnouncementController {
     public ApiResponse<Integer> createAnnouncement(@Valid @RequestBody AnnouncementCreateRequest request) {
         int count = adminAnnouncementService.createAnnouncement(request);
         return ApiResponse.success(count);
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse<AnnouncementDetailResponse> getAnnouncementDetail(@PathVariable Integer id) {
+        AnnouncementDetailResponse detail = adminAnnouncementService.getAnnouncementDetail(id);
+        return ApiResponse.success(detail);
     }
 
     @PutMapping("/{id}")

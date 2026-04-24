@@ -3,11 +3,21 @@ import { useAuthStore } from '@/store/auth';
 import { useWindowWidth } from '@/hooks/useWindowWidth';
 import { MIN_PC_WIDTH } from '@/utils/constants';
 import SiteHeader from '@/components/SiteHeader';
+import AdminLayout from '@/components/AdminLayout';
 import AnnouncementList from '@/pages/AnnouncementList';
 import AnnouncementDetail from '@/pages/AnnouncementDetail';
 import Login from '@/pages/admin/Login';
 import Dashboard from '@/pages/admin/Dashboard';
 import AnnouncementManage from '@/pages/admin/AnnouncementManage';
+
+function RootLayout() {
+  return (
+    <>
+      <SiteHeader />
+      <Outlet />
+    </>
+  );
+}
 
 function MobileGuard() {
   const { isPC } = useWindowWidth();
@@ -43,17 +53,27 @@ function AdminRoute() {
 
 const router = createBrowserRouter([
   {
-    element: <MobileGuard />,
+    element: <RootLayout />,
     children: [
-      { path: '/', element: <Navigate to="/announcements" replace /> },
-      { path: '/announcements', element: <AnnouncementList /> },
-      { path: '/announcements/:id', element: <AnnouncementDetail /> },
-      { path: '/admin/login', element: <Login /> },
       {
-        element: <AdminRoute />,
+        element: <MobileGuard />,
         children: [
-          { path: '/admin', element: <Dashboard /> },
-          { path: '/admin/announcements', element: <AnnouncementManage /> },
+          { path: '/', element: <Navigate to="/announcements" replace /> },
+          { path: '/announcements', element: <AnnouncementList /> },
+          { path: '/announcements/:id', element: <AnnouncementDetail /> },
+          { path: '/admin/login', element: <Login /> },
+          {
+            element: <AdminRoute />,
+            children: [
+              {
+                element: <AdminLayout />,
+                children: [
+                  { path: '/admin', element: <Dashboard /> },
+                  { path: '/admin/announcements', element: <AnnouncementManage /> },
+                ],
+              },
+            ],
+          },
         ],
       },
     ],
@@ -61,12 +81,7 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return (
-    <>
-      <SiteHeader />
-      <RouterProvider router={router} />
-    </>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

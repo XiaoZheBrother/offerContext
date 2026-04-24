@@ -9,6 +9,7 @@ export interface AnnouncementListResponse {
   cityNames: string[];
   expiredAt: string;
   applyStatus: ApplyStatus;
+  onlineStatus: number;
   createdAt: string;
 }
 
@@ -22,6 +23,9 @@ export interface AnnouncementDetailResponse {
   classTypeNames: string[];
   campusTypeNames: string[];
   cityNames: string[];
+  classTypeIds: number[];
+  campusTypeIds: number[];
+  cityIds: number[];
   degreeNames: string[];
   industryTypeNames: string[];
   jobCategoryNames: string[];

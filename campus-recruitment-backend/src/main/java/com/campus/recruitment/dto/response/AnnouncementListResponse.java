@@ -14,5 +14,6 @@ public class AnnouncementListResponse {
     private List<String> cityNames;
     private LocalDate expiredAt;
     private String applyStatus;  // "not_started" / "ongoing" / "expired"
+    private Short onlineStatus;
     private LocalDate createdAt;
 }

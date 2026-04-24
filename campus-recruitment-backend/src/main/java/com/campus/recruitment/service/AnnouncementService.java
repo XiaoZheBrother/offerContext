@@ -197,12 +197,18 @@ public class AnnouncementService {
         }
 
         // Cities
+        List<Integer> cityIds = announcementCityRepository.findCityIdsByAnnouncementId(announcement.getAnnouncementId());
+        response.setCityIds(cityIds);
         response.setCityNames(fetchCityNames(announcement.getAnnouncementId()));
 
         // ClassTypes
+        List<Integer> classTypeIds = announcementClassTypeRepository.findClassTypeIdsByAnnouncementId(announcement.getAnnouncementId());
+        response.setClassTypeIds(classTypeIds);
         response.setClassTypeNames(fetchClassTypeNames(announcement.getAnnouncementId()));
 
         // CampusTypes
+        List<Integer> campusTypeIds = announcementCampusTypeRepository.findCampusTypeIdsByAnnouncementId(announcement.getAnnouncementId());
+        response.setCampusTypeIds(campusTypeIds);
         response.setCampusTypeNames(fetchCampusTypeNames(announcement.getAnnouncementId()));
 
         // Degrees

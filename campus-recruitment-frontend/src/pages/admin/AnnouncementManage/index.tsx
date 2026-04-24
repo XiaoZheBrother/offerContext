@@ -34,6 +34,7 @@ export default function AnnouncementManage() {
     onSuccess: () => {
       message.success('删除成功');
       queryClient.invalidateQueries({ queryKey: ['adminAnnouncements'] });
+      queryClient.invalidateQueries({ queryKey: ['announcements'] });
     },
   });
 
@@ -42,6 +43,7 @@ export default function AnnouncementManage() {
       updateAnnouncementStatus(id, onlineStatus),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminAnnouncements'] });
+      queryClient.invalidateQueries({ queryKey: ['announcements'] });
     },
   });
 
@@ -96,7 +98,7 @@ export default function AnnouncementManage() {
       render: (_: unknown, record: AnnouncementListResponse) => (
         <Switch
           size="small"
-          defaultChecked={status !== 'offline'}
+          checked={record.onlineStatus === 1}
           onChange={(checked) => {
             statusMutation.mutate({
               id: record.announcementId,
@@ -183,6 +185,7 @@ export default function AnnouncementManage() {
           setFormOpen(false);
           setEditId(null);
           queryClient.invalidateQueries({ queryKey: ['adminAnnouncements'] });
+          queryClient.invalidateQueries({ queryKey: ['announcements'] });
         }}
       />
     </div>

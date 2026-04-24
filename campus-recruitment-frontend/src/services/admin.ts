@@ -1,11 +1,16 @@
 import request from '@/utils/request';
 import type { PageResponse } from '@/types/api';
-import type { AnnouncementListResponse, AnnouncementCreateRequest } from '@/types/announcement';
+import type { AnnouncementListResponse, AnnouncementCreateRequest, AnnouncementDetailResponse } from '@/types/announcement';
 import type { LoginResponse, StatisticsResponse, TopCompanyItem, AdminAnnouncementListParams } from '@/types/admin';
 
 export async function login(username: string, password: string) {
   const res = await request.post('/admin/login', { username, password });
   return res.data as LoginResponse;
+}
+
+export async function getAdminAnnouncementDetail(id: number) {
+  const res = await request.get(`/admin/announcements/${id}`);
+  return res.data as AnnouncementDetailResponse;
 }
 
 export async function getAdminAnnouncements(params: AdminAnnouncementListParams) {
