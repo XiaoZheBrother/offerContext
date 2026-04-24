@@ -6,6 +6,7 @@ import AnnouncementList from '@/pages/AnnouncementList';
 import AnnouncementDetail from '@/pages/AnnouncementDetail';
 import Login from '@/pages/admin/Login';
 import Dashboard from '@/pages/admin/Dashboard';
+import AnnouncementManage from '@/pages/admin/AnnouncementManage';
 
 function MobileGuard() {
   const { isPC } = useWindowWidth();
@@ -39,15 +40,6 @@ function AdminRoute() {
   return <Outlet />;
 }
 
-function Placeholder({ title }: { title: string }) {
-  return (
-    <div style={{ padding: '48px', textAlign: 'center' }}>
-      <h1>{title}</h1>
-      <p style={{ color: '#999', marginTop: '12px' }}>页面开发中...</p>
-    </div>
-  );
-}
-
 const router = createBrowserRouter([
   {
     element: <MobileGuard />,
@@ -60,7 +52,7 @@ const router = createBrowserRouter([
         element: <AdminRoute />,
         children: [
           { path: '/admin', element: <Dashboard /> },
-          { path: '/admin/announcements', element: <Placeholder title="公告管理" /> },
+          { path: '/admin/announcements', element: <AnnouncementManage /> },
         ],
       },
     ],
