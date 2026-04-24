@@ -1,9 +1,13 @@
 .filterBar {
-  background: #fff;
-  padding: 20px 24px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius);
+  padding: 20px 24px 16px;
+  margin-bottom: 24px;
+  border: 1px solid rgba(255,255,255,0.6);
+  box-shadow: var(--shadow-md);
+  animation: fadeSlideUp 0.5s ease 0.1s both;
 }
 
 .filterRow {
@@ -11,36 +15,75 @@
   flex-wrap: wrap;
   gap: 12px;
   align-items: flex-end;
-  margin-bottom: 12px;
 }
 
-.filterItem {
+.filterGroup {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  min-width: 160px;
+  gap: 5px;
 }
 
-.filterItem label {
-  font-size: 13px;
-  color: #666;
-  white-space: nowrap;
+.filterGroup label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--slate-light);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .searchItem {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  min-width: 240px;
+  gap: 5px;
 }
 
 .searchItem label {
-  font-size: 13px;
-  color: #666;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--slate-light);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .actions {
   display: flex;
   gap: 8px;
   align-items: center;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-light);
+}
+
+.applyBtn {
+  height: 38px;
+  padding: 0 28px;
+  background: var(--navy);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font-body);
+}
+
+.applyBtn:hover {
+  background: var(--navy-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(26,39,68,0.2);
+}
+
+.resetBtn {
+  border: none;
+  background: none;
+  color: var(--slate-light);
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: var(--font-body);
+}
+
+.resetBtn:hover {
+  color: var(--navy);
 }

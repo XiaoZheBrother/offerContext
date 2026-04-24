@@ -56,6 +56,22 @@ export default function AnnouncementList() {
 
   return (
     <div className={styles.page}>
+      {/* Stats Bar */}
+      <div className={styles.statsBar}>
+        <div className={styles.statChip}>
+          <span className={styles.statNum}>{data?.total ?? '-'}</span> 条在招
+          <span className={`${styles.dot} ${styles.dotOngoing}`} />
+        </div>
+        <div className={styles.statChip}>
+          <span className={styles.statNum}>{data?.total ?? '-'}</span> 条已截止
+          <span className={`${styles.dot} ${styles.dotExpired}`} />
+        </div>
+        <div className={styles.statChip}>
+          <span className={styles.statNum}>{data?.total ?? '-'}</span> 条即将开始
+          <span className={`${styles.dot} ${styles.dotNotStarted}`} />
+        </div>
+      </div>
+
       {filterOptions && (
         <FilterBar
           filterOptions={filterOptions}
@@ -69,7 +85,7 @@ export default function AnnouncementList() {
       {isLoading ? (
         <div className={styles.skeletonGrid}>
           {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} style={{ height: 220 }}>
+            <Card key={i} style={{ height: 260 }}>
               <Skeleton active paragraph={{ rows: 3 }} />
             </Card>
           ))}

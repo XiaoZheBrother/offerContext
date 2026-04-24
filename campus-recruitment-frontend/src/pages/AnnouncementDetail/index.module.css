@@ -1,18 +1,21 @@
 .page {
   max-width: 900px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 28px 24px 48px;
 }
 
 .breadcrumb {
   margin-bottom: 16px;
+  animation: fadeSlideUp 0.4s ease both;
 }
 
 .content {
-  background: #fff;
-  border-radius: 8px;
+  background: var(--white);
+  border-radius: var(--radius);
   padding: 32px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-light);
+  animation: fadeSlideUp 0.4s ease 0.1s both;
 }
 
 .header {
@@ -20,15 +23,19 @@
 }
 
 .companyName {
-  font-size: 18px;
-  color: #666;
-  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--slate-light);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
 }
 
 .announcementName {
+  font-family: var(--font-display);
   font-size: 24px;
   font-weight: 700;
-  color: #1d1d1f;
+  color: var(--navy);
   margin-bottom: 8px;
 }
 
@@ -37,13 +44,14 @@
 }
 
 .notStartedBanner {
-  background: #fff7e6;
+  background: var(--amber-light);
   border: 1px solid #ffd591;
-  border-radius: 4px;
-  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
   margin-bottom: 16px;
-  color: #d46b08;
+  color: var(--amber);
   font-size: 14px;
+  font-weight: 500;
 }
 
 .infoGrid {
@@ -52,7 +60,7 @@
   gap: 12px 24px;
   margin-bottom: 24px;
   padding-bottom: 24px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .infoItem {
@@ -62,19 +70,22 @@
 }
 
 .infoLabel {
-  font-size: 13px;
-  color: #999;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--steel);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .infoValue {
   font-size: 14px;
-  color: #1d1d1f;
+  color: var(--navy);
 }
 
 .tagsSection {
   margin-bottom: 24px;
   padding-bottom: 24px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .tagGroup {
@@ -82,27 +93,31 @@
 }
 
 .tagLabel {
-  font-size: 13px;
-  color: #999;
-  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--steel);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 6px;
 }
 
 .tagList {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 6px;
 }
 
 .detailSection {
   margin-bottom: 24px;
   padding-bottom: 24px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .sectionTitle {
+  font-family: var(--font-display);
   font-size: 16px;
   font-weight: 600;
-  color: #1d1d1f;
+  color: var(--navy);
   margin-bottom: 12px;
 }
 
@@ -117,11 +132,13 @@
   min-width: 160px;
   height: 44px;
   font-size: 16px;
+  border-radius: var(--radius-sm) !important;
 }
 
 .linkButton {
   height: 44px;
   font-size: 14px;
+  border-radius: var(--radius-sm) !important;
 }
 
 .emailModalContent {
@@ -132,21 +149,23 @@
 .emailAddress {
   font-size: 20px;
   font-weight: 600;
-  color: #1677ff;
+  color: var(--sky);
   margin: 16px 0;
   word-break: break-all;
   user-select: all;
 }
 
 .emailHint {
-  color: #666;
+  color: var(--slate);
   margin-bottom: 16px;
 }
 
 .skeleton {
-  background: #fff;
-  border-radius: 8px;
+  background: var(--white);
+  border-radius: var(--radius);
   padding: 32px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-light);
 }
 
 .errorState {

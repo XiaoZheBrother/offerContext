@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider, Navigate, Outlet } from 'react-rou
 import { useAuthStore } from '@/store/auth';
 import { useWindowWidth } from '@/hooks/useWindowWidth';
 import { MIN_PC_WIDTH } from '@/utils/constants';
+import SiteHeader from '@/components/SiteHeader';
 import AnnouncementList from '@/pages/AnnouncementList';
 import AnnouncementDetail from '@/pages/AnnouncementDetail';
 import Login from '@/pages/admin/Login';
@@ -60,7 +61,12 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <SiteHeader />
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
 export default App;

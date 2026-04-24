@@ -1,4 +1,4 @@
-import { Input, Select, Button, Radio } from 'antd';
+import { Input, Select, Radio } from 'antd';
 import type { FilterOptionsResponse } from '@/types/announcement';
 import type { FilterFormState } from '@/hooks/useFilter';
 import { APPLY_STATUS_LABELS } from '@/utils/constants';
@@ -35,7 +35,7 @@ export default function FilterBar({ filterOptions, filters, onFiltersChange, onA
             allowClear
           />
         </div>
-        <div className={styles.filterItem}>
+        <div className={styles.filterGroup}>
           <label>毕业年份</label>
           <Select
             mode="multiple"
@@ -47,8 +47,8 @@ export default function FilterBar({ filterOptions, filters, onFiltersChange, onA
             allowClear
           />
         </div>
-        <div className={styles.filterItem}>
-          <label>批次</label>
+        <div className={styles.filterGroup}>
+          <label>招聘批次</label>
           <Select
             mode="multiple"
             placeholder="选择招聘批次"
@@ -59,8 +59,8 @@ export default function FilterBar({ filterOptions, filters, onFiltersChange, onA
             allowClear
           />
         </div>
-        <div className={styles.filterItem}>
-          <label>地点</label>
+        <div className={styles.filterGroup}>
+          <label>工作城市</label>
           <Select
             mode="multiple"
             placeholder="选择城市"
@@ -81,7 +81,7 @@ export default function FilterBar({ filterOptions, filters, onFiltersChange, onA
             allowClear
           />
         </div>
-        <div className={styles.filterItem}>
+        <div className={styles.filterGroup}>
           <label>投递状态</label>
           <Radio.Group
             value={filters.applyStatus}
@@ -99,12 +99,12 @@ export default function FilterBar({ filterOptions, filters, onFiltersChange, onA
         </div>
       </div>
       <div className={styles.actions}>
-        <Button type="primary" onClick={onApply}>
+        <button className={styles.applyBtn} onClick={onApply}>
           应用筛选
-        </Button>
-        <Button type="link" onClick={onReset}>
+        </button>
+        <button className={styles.resetBtn} onClick={onReset}>
           重置
-        </Button>
+        </button>
       </div>
     </div>
   );
