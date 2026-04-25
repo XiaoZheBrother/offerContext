@@ -1,6 +1,6 @@
 # OfferContext - 校招信息汇总平台
 
-一站式校招信息聚合平台，从多渠道爬取校招公告，提供统一的浏览、筛选、投递入口。
+一站式校招信息聚合平台，从多渠道爬取校招公告，提供统一的浏览、筛选、收藏、投递追踪入口。
 
 ## 项目架构
 
@@ -9,18 +9,21 @@ offerContext/
 ├── campus-recruitment-backend/     # Spring Boot 后端
 ├── campus-recruitment-frontend/    # React 前端
 └── docs/                          # 文档
-    └── deployment.md              # 部署文档
+    ├── deployment.md               # 部署文档
+    ├── database-and-tech-design.md # 数据库与技术方案
+    └── acceptance-checklist.md     # 验收清单
 ```
 
 ## 技术栈
 
 | 层级 | 技术 |
 |------|------|
-| 前端 | React 19 + TypeScript 6 + Ant Design 6 + Vite 8 |
+| 前端 | React 19 + TypeScript 6 + Ant Design 6 + Vite 8 + React Query 5 + Zustand 5 |
 | 后端 | Java 17 + Spring Boot 3.2 + Spring Data JPA + Spring Security |
 | 数据库 | MySQL 5.7 |
-| 认证 | JWT (jjwt 0.12.x) |
-| 安全 | AntiSamy XSS 防护 |
+| 缓存 | Redis 6.0+（Magic Link Token + 频率限制） |
+| 认证 | 双 JWT（管理端 + 用户端 Magic Link） |
+| 安全 | AntiSamy XSS 防护 + Redis 频率限制 |
 
 ## 快速开始
 
@@ -30,18 +33,22 @@ offerContext/
 - Maven 3.3+
 - Node.js 18+
 - MySQL 5.7+
+- Redis 6.0+
 
 ### 1. 初始化数据库
 
 ```bash
 mysql -h <host> -u <user> -p <database> < campus-recruitment-backend/src/main/resources/db/migration/V1__create_new_tables.sql
+mysql -h <host> -u <user> -p <database> < campus-recruitment-backend/src/main/resources/db/migration/V2__create_user_tables.sql
 ```
+
+V2 迁移新增：`users`、`favorites`、`application_records` 表。
 
 ### 2. 启动后端
 
 ```bash
 cd campus-recruitment-backend
-# 修改 src/main/resources/application-dev.yml 中的数据库连接
+# 修改 src/main/resources/application-dev.yml 中的数据库和 Redis 连接
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
@@ -55,10 +62,11 @@ npm run dev
 
 ### 4. 访问
 
-- C端：http://localhost:3000
-- 后台：http://localhost:3000/admin
+- C端：http://localhost:5173
+- 后台：http://localhost:5173/admin
 - API：http://localhost:8080/api
 - 默认管理员：admin / admin123
+- C端用户：通过 Magic Link 邮箱登录（开发模式直接返回 token）
 
 ## 核心功能
 
@@ -68,6 +76,10 @@ npm run dev
 - 5维筛选：关键词 / 毕业届次 / 招聘批次 / 城市 / 投递状态
 - 公告详情：完整信息 + 一键投递
 - 申请状态实时计算：进行中 / 已截止 / 未开始
+- **用户登录**：邮箱 Magic Link 无密码登录
+- **收藏**：一键收藏/取消，"我的收藏"页按截止时间排序高亮
+- **投递记录**：标记投递 + 状态流转（已投递→笔试→面试→Offer/拒绝）
+- **响应式适配**：桌面3列 / 平板2列 / 手机1列
 - 埋点统计：PV/UV/点击
 
 ### 后台管理
@@ -87,20 +99,21 @@ npm run dev
 | 投递入口 | from_url=投递链接, link=宣发网址 | 以实际数据字段语义为准 |
 | 动态筛选 | JPA Specification | 5维度独立可选，避免组合爆炸 |
 | 埋点写入 | @Async 异步 | 不阻塞 API 响应 |
+| 用户认证 | 双 JWT（管理端 + 用户端） | C端与管理端独立认证，互不干扰 |
+| Magic Link | Redis 存储 token（15min TTL） | 一次性使用，自动过期，无需额外持久化 |
+| 频率限制 | Redis 计数器 | 同邮箱 1次/分钟 10次/天，同 IP 5次/分钟 50次/天 |
+| 投递状态流转 | applied → written_test → interview → offer/rejected | 单向流转，已进入后续阶段不可 toggle 取消 |
+| 响应式 | CSS @media 查询 | 避免引入 Tailwind 与 Ant Design 样式冲突 |
 
-## 与 PRD 的实现差异
+## 版本历史
 
-| PRD 要求 | 实际实现 | 原因 |
-|---------|---------|------|
-| 热门企业TOP10按时间维度切换（今日/7天/累计点击数） | 按行为维度切换（点击/浏览/投递） | 行为维度更有运营参考价值，可后续补充时间维度 |
-| 删除为软删除（前台后台均不可见） | 删除=下线（online_status=0，后台仍可见） | 1.0极简版无需区分，下线即可达到前台不可见效果 |
-| 投递状态筛选：全部/进行中/已截止 | 增加"未开始"选项 | 详情页标签需要判断未开始状态，筛选也提供该选项更完整 |
-| 网申开始日期为独立字段 | 复用 published_at（信息发布日期） | 现有数据无独立网申开始日期字段，published_at 语义足够 |
-| 列表滚动无限加载 | 前端实现时可选择分页或无限滚动 | 后端分页API已就绪，前端交互方式灵活选择 |
-| 筛选需点击"应用筛选"按钮 | 前端实现时按PRD交互 | 后端API即时响应无限制，前端控制触发时机 |
+| 版本 | 日期 | 主要变更 |
+|------|------|---------|
+| 1.0 | 2026-04-24 | 公告浏览/筛选/详情 + 管理后台 CRUD + 埋点统计 |
+| 2.0 | 2026-04-25 | 用户登录 + 收藏 + 投递记录 + 响应式适配 |
 
-## 子项目
+## 文档
 
-- [后端文档](campus-recruitment-backend/README.md)
-- [前端文档](campus-recruitment-frontend/README.md)
 - [部署文档](docs/deployment.md)
+- [数据库与技术方案](docs/database-and-tech-design.md)
+- [验收清单](docs/acceptance-checklist.md)

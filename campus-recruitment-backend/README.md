@@ -1,12 +1,13 @@
 # Campus Recruitment Backend
 
-校招信息汇总平台后端服务，基于 Spring Boot 3.2 构建，提供校招公告浏览、筛选、后台管理等 API。
+校招信息汇总平台后端服务，基于 Spring Boot 3.2 构建，提供校招公告浏览、筛选、用户认证、收藏、投递记录、后台管理等 API。
 
 ## 技术栈
 
 - **Java 17** + **Spring Boot 3.2.0**
 - **Spring Data JPA** + Hibernate（MySQL 5.7）
-- **Spring Security** + JWT（jjwt 0.12.x）
+- **Spring Data Redis**（Magic Link Token + 频率限制）
+- **Spring Security** + 双 JWT（管理端 + 用户端 jjwt 0.12.x）
 - **AntiSamy** XSS 防护
 - **Lombok**
 - **Maven**
@@ -17,9 +18,12 @@
 src/main/java/com/campus/recruitment/
 ├── Application.java          # 启动类
 ├── common/                   # 通用类（ApiResponse, PageResponse）
-├── config/                   # 配置类（SecurityConfig, JwtAuthenticationFilter）
+├── config/                   # 配置类（SecurityConfig, JwtAuthenticationFilter, RateLimitFilter）
 ├── controller/
 │   ├── AnnouncementController.java   # C端：公告列表/详情/筛选
+│   ├── AuthController.java           # C端：Magic Link 登录/验证/登出/用户信息
+│   ├── FavoriteController.java       # C端：收藏增删查
+│   ├── ApplicationController.java    # C端：投递记录 toggle/CRUD
 │   ├── TrackingController.java       # C端：点击/访问埋点
 │   └── admin/                        # 后台管理
 │       ├── AdminAuthController.java          # 登录
@@ -29,7 +33,8 @@ src/main/java/com/campus/recruitment/
 │   ├── ApplyStatus.java              # 申请状态枚举
 │   ├── request/                      # 请求DTO
 │   └── response/                     # 响应DTO
-├── entity/                   # JPA实体（20+个）
+├── entity/                   # JPA实体（20+个，含 User, Favorite, ApplicationRecord）
+├── enums/                    # 枚举（ApplicationStatus: APPLIED/WRITTEN_TEST/INTERVIEW/OFFER/REJECTED）
 ├── exception/                # 异常处理
 ├── repository/               # JPA Repository
 ├── service/                  # 业务逻辑
@@ -43,10 +48,11 @@ src/main/java/com/campus/recruitment/
 - JDK 17+
 - Maven 3.3+
 - MySQL 5.7+
+- Redis 6.0+
 
 ### 配置
 
-编辑 `src/main/resources/application-dev.yml`，修改数据库连接信息：
+编辑 `src/main/resources/application-dev.yml`，修改数据库和 Redis 连接信息：
 
 ```yaml
 spring:
@@ -54,6 +60,10 @@ spring:
     url: jdbc:mysql://<host>:<port>/<database>?useSSL=false&serverTimezone=Asia/Shanghai&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
     username: <username>
     password: <password>
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
 ```
 
 JWT 密钥在 `application.yml` 中配置，生产环境务必通过环境变量覆盖。
@@ -64,13 +74,19 @@ JWT 密钥在 `application.yml` 中配置，生产环境务必通过环境变量
 
 ```bash
 mysql -h <host> -u <user> -p <database> < src/main/resources/db/migration/V1__create_new_tables.sql
+mysql -h <host> -u <user> -p <database> < src/main/resources/db/migration/V2__create_user_tables.sql
 ```
 
-该脚本会：
+V1 脚本会：
 - 为 `announcements` 表新增 `online_status` 列
 - 更新 `expired_at` 为 NULL 的记录（默认 published_at + 90 天）
 - 创建 `page_views`、`click_logs`、`admin_users` 表
 - 插入默认管理员账号（admin / admin123）
+
+V2 脚本会：
+- 创建 `users` 表（C端用户，邮箱登录）
+- 创建 `favorites` 表（收藏，user_id + announcement_id 联合唯一）
+- 创建 `application_records` 表（投递记录，状态流转）
 
 ### 启动
 
@@ -91,9 +107,21 @@ java -jar target/campus-recruitment-backend-1.0.0-SNAPSHOT.jar --spring.profiles
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | /announcements | 公告列表（支持筛选/分页） |
-| GET | /announcements/{id} | 公告详情 |
+| GET | /announcements | 公告列表（支持筛选/分页，登录后返回收藏/投递状态） |
+| GET | /announcements/{id} | 公告详情（登录后返回收藏/投递状态） |
 | GET | /announcements/filter-options | 筛选选项 |
+| POST | /auth/send-magic-link | 发送 Magic Link 登录邮件（开发模式直接返回 token） |
+| GET | /auth/verify?token=xxx | 验证 Magic Link，获取 JWT |
+| POST | /auth/logout | 退出登录 |
+| GET | /auth/me | 获取当前用户信息 |
+| POST | /favorites | 添加收藏 |
+| DELETE | /favorites/{announcementId} | 取消收藏 |
+| GET | /favorites | 我的收藏列表 |
+| POST | /applications/toggle | 切换投递状态 |
+| POST | /applications | 创建投递记录 |
+| GET | /applications | 我的投递记录 |
+| PUT | /applications/{id} | 更新投递状态/备注 |
+| DELETE | /applications/{id} | 删除投递记录 |
 | POST | /click-logs | 记录点击 |
 | POST | /page-views | 记录访问 |
 
@@ -124,6 +152,11 @@ java -jar target/campus-recruitment-backend-1.0.0-SNAPSHOT.jar --spring.profiles
 
 ## 关键设计
 
+- **双 JWT 体系**：管理端 JWT（role=ADMIN, 24h）+ 用户端 JWT（role=USER, 7天），统一由 JwtAuthenticationFilter 处理
+- **Magic Link 登录**：邮箱发送 → Redis 存储 token（15min TTL）→ 验证后创建/查找用户 → 生成 JWT
+- **频率限制**：同邮箱 1次/分钟 10次/天，同 IP 5次/分钟 50次/天，基于 Redis 计数器
+- **投递状态流转**：applied → written_test → interview → offer/rejected，单向不可逆
+- **公告列表用户态**：列表/详情接口通过 SecurityContext 获取当前用户，批量查询收藏和投递状态，避免 N+1
 - **online_status**：独立于爬虫系统的 status 字段，控制前端可见性
 - **申请状态**：实时计算（ONGOING/EXPIRED/NOT_STARTED），expired_at=NULL 时视为"招完即止"，排序用 published_at+90天
 - **字段语义**：`from_url` = 投递链接，`link` = 宣发网址
