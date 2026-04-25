@@ -8,15 +8,15 @@ import org.owasp.validator.html.Policy;
 @Slf4j
 public class XssUtils {
 
-    private static final AntiSamy ANTI_SAMY;
+    private static AntiSamy antiSamy;
 
     static {
         try {
             Policy policy = Policy.getInstance(XssUtils.class.getResourceAsStream("/antisamy.xml"));
-            ANTI_SAMY = new AntiSamy(policy);
+            antiSamy = new AntiSamy(policy);
         } catch (Exception e) {
-            log.error("Failed to initialize AntiSamy policy", e);
-            throw new RuntimeException("Failed to initialize AntiSamy", e);
+            log.warn("Failed to initialize AntiSamy policy, XSS cleaning will be bypassed", e);
+            antiSamy = null;
         }
     }
 
@@ -24,12 +24,15 @@ public class XssUtils {
         if (html == null || html.isBlank()) {
             return html;
         }
+        if (antiSamy == null) {
+            return html;
+        }
         try {
-            CleanResults results = ANTI_SAMY.scan(html);
+            CleanResults results = antiSamy.scan(html);
             return results.getCleanHTML();
         } catch (Exception e) {
-            log.warn("XSS cleaning failed, returning empty string", e);
-            return "";
+            log.warn("XSS cleaning failed, returning original content", e);
+            return html;
         }
     }
 }

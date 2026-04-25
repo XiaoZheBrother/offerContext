@@ -73,6 +73,8 @@ public class AdminAnnouncementService {
         Company company = companyRepository.findByName(request.getCompanyName())
                 .orElseGet(() -> {
                     Company newCompany = new Company();
+                    Integer maxId = companyRepository.findMaxId().orElse(0);
+                    newCompany.setCompanyId(maxId + 1);
                     newCompany.setName(request.getCompanyName());
                     newCompany.setCreatedAt(LocalDateTime.now());
                     newCompany.setUpdatedAt(LocalDateTime.now());
@@ -85,6 +87,8 @@ public class AdminAnnouncementService {
                 if (cityName != null && !cityName.isBlank()) {
                     if (!cityRepository.findByName(cityName).isPresent()) {
                         City newCity = new City();
+                        Integer maxCityId = cityRepository.findMaxId().orElse(0);
+                        newCity.setCityId(maxCityId + 1);
                         newCity.setName(cityName);
                         newCity.setIsTop((short) 0);
                         newCity.setWeight(0);
@@ -103,9 +107,14 @@ public class AdminAnnouncementService {
         int count = 0;
         LocalDateTime now = LocalDateTime.now();
 
+        // Pre-calculate the starting ID for new announcements
+        int maxAnnouncementId = announcementRepository.findMaxId().orElse(0);
+
         // For each campusTypeId, create a separate Announcement record (batch auto-split)
         for (Integer campusTypeId : request.getCampusTypeIds()) {
+            count++;
             Announcement announcement = new Announcement();
+            announcement.setAnnouncementId(maxAnnouncementId + count);
             announcement.setName(XssUtils.clean(request.getName()));
             announcement.setDetail(XssUtils.clean(request.getDetail()));
             announcement.setFromUrl(request.getApplyLink());  // applyLink -> from_url (投递链接)
@@ -175,6 +184,8 @@ public class AdminAnnouncementService {
         Company company = companyRepository.findByName(request.getCompanyName())
                 .orElseGet(() -> {
                     Company newCompany = new Company();
+                    Integer maxId = companyRepository.findMaxId().orElse(0);
+                    newCompany.setCompanyId(maxId + 1);
                     newCompany.setName(request.getCompanyName());
                     newCompany.setCreatedAt(LocalDateTime.now());
                     newCompany.setUpdatedAt(LocalDateTime.now());
@@ -187,6 +198,8 @@ public class AdminAnnouncementService {
                 if (cityName != null && !cityName.isBlank()) {
                     if (!cityRepository.findByName(cityName).isPresent()) {
                         City newCity = new City();
+                        Integer maxCityId = cityRepository.findMaxId().orElse(0);
+                        newCity.setCityId(maxCityId + 1);
                         newCity.setName(cityName);
                         newCity.setIsTop((short) 0);
                         newCity.setWeight(0);
@@ -232,6 +245,9 @@ public class AdminAnnouncementService {
         announcementCityRepository.deleteByAnnouncementId(id);
         announcementClassTypeRepository.deleteByAnnouncementId(id);
         announcementCampusTypeRepository.deleteByAnnouncementId(id);
+        announcementCityRepository.flush();
+        announcementClassTypeRepository.flush();
+        announcementCampusTypeRepository.flush();
 
         // Re-insert cities
         for (Integer cityId : request.getCityIds()) {

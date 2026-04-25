@@ -28,7 +28,7 @@
         </attribute>
         <attribute name="href" description="The href attribute">
             <regexp-list>
-                <regexp value="(\s)*(javascript:|vbscript:|data:).*" negate="true"/>
+                <regexp value="^(?!(javascript:|vbscript:|data:)).*"/>
             </regexp-list>
         </attribute>
         <attribute name="align" description="The align attribute">
@@ -107,7 +107,7 @@
         <tag name="img" action="validate">
             <attribute name="src">
                 <regexp-list>
-                    <regexp value="(\s)*(javascript:|vbscript:|data:).*" negate="true"/>
+                    <regexp value="^(?!(javascript:|vbscript:|data:)).*"/>
                 </regexp-list>
             </attribute>
             <attribute name="alt">
