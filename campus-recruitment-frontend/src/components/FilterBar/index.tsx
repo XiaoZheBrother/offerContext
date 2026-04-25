@@ -43,7 +43,7 @@ export default function FilterBar({ filterOptions, filters, onFiltersChange, onA
             value={filters.classTypeIds}
             onChange={(val) => update({ classTypeIds: val })}
             options={filterOptions.classTypes.map((t) => ({ value: t.id, label: t.name }))}
-            maxTagCount="responsive"
+            maxTagCount={2}
             allowClear
           />
         </div>
@@ -55,7 +55,7 @@ export default function FilterBar({ filterOptions, filters, onFiltersChange, onA
             value={filters.campusTypeIds}
             onChange={(val) => update({ campusTypeIds: val })}
             options={filterOptions.campusTypes.map((t) => ({ value: t.id, label: t.name }))}
-            maxTagCount="responsive"
+            maxTagCount={2}
             allowClear
           />
         </div>
@@ -77,7 +77,7 @@ export default function FilterBar({ filterOptions, filters, onFiltersChange, onA
             ].filter((item, idx, arr) =>
               item.label !== '---' || (item.label === '---' && idx > 0 && arr[idx - 1]?.label !== '---')
             )}
-            maxTagCount="responsive"
+            maxTagCount={2}
             allowClear
           />
         </div>
