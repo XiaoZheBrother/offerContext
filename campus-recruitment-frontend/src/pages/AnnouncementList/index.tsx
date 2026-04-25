@@ -1,19 +1,23 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { useQuery, keepPreviousData, useQueryClient } from '@tanstack/react-query';
 import { Pagination, Empty, Skeleton, Card } from 'antd';
 import { getAnnouncements, getFilterOptions } from '@/services/announcement';
 import { recordPageView } from '@/services/tracking';
 import { useFilter } from '@/hooks/useFilter';
+import { useUserAuthStore } from '@/store/userAuthStore';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import type { AnnouncementListResponse } from '@/types/announcement';
 import FilterBar from '@/components/FilterBar';
 import AnnouncementCard from '@/components/AnnouncementCard';
+import LoginModal from '@/components/LoginModal';
 import styles from './index.module.css';
 
 export default function AnnouncementList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { filters, setFilters, applyFilters, resetFilters } = useFilter();
+  const [loginOpen, setLoginOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const activePage = Number(searchParams.get('page')) || 1;
   const activeKeyword = searchParams.get('keyword') || undefined;
@@ -104,7 +108,12 @@ export default function AnnouncementList() {
         <>
           <div className={styles.grid}>
             {data.list.map((item: AnnouncementListResponse) => (
-              <AnnouncementCard key={item.announcementId} data={item} />
+              <AnnouncementCard
+                key={item.announcementId}
+                data={item}
+                onLoginClick={() => setLoginOpen(true)}
+                onStatusChange={() => queryClient.invalidateQueries({ queryKey: ['announcements'] })}
+              />
             ))}
           </div>
           {data.totalPages > 1 && (
@@ -121,6 +130,7 @@ export default function AnnouncementList() {
           )}
         </>
       )}
+      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} onSuccess={() => queryClient.invalidateQueries({ queryKey: ['announcements'] })} />
     </div>
   );
 }

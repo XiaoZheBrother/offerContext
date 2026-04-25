@@ -1,22 +1,84 @@
-import { Tag } from 'antd';
-import { EnvironmentOutlined } from '@ant-design/icons';
+import { useState } from 'react';
+import { Tag, message } from 'antd';
+import { EnvironmentOutlined, HeartFilled, HeartOutlined, CheckCircleFilled, CheckCircleOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import type { AnnouncementListResponse } from '@/types/announcement';
 import { APPLY_STATUS_LABELS, ROUTES } from '@/utils/constants';
+import { APPLICATION_STATUS_LABELS } from '@/types/user';
+import { useUserAuthStore } from '@/store/userAuthStore';
+import { addFavorite, removeFavorite } from '@/services/favorites';
+import { toggleApplication } from '@/services/applications';
 import styles from './index.module.css';
 
 const MAX_CITIES = 5;
 
 interface AnnouncementCardProps {
   data: AnnouncementListResponse;
+  onLoginClick?: () => void;
+  onStatusChange?: () => void;
 }
 
-export default function AnnouncementCard({ data }: AnnouncementCardProps) {
+export default function AnnouncementCard({ data, onLoginClick, onStatusChange }: AnnouncementCardProps) {
   const navigate = useNavigate();
+  const { user } = useUserAuthStore();
+  const [isFavorited, setIsFavorited] = useState(data.isFavorited || false);
+  const [isApplied, setIsApplied] = useState(data.isApplied || false);
+  const [appStatus, setAppStatus] = useState(data.applicationStatus || null);
+  const [favLoading, setFavLoading] = useState(false);
+  const [appLoading, setAppLoading] = useState(false);
 
   const handleClick = () => {
     navigate(ROUTES.ANNOUNCEMENTS + '/' + data.announcementId);
+  };
+
+  const handleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
+      onLoginClick?.();
+      return;
+    }
+    setFavLoading(true);
+    try {
+      if (isFavorited) {
+        await removeFavorite(data.announcementId);
+        setIsFavorited(false);
+      } else {
+        await addFavorite(data.announcementId);
+        setIsFavorited(true);
+      }
+      onStatusChange?.();
+    } catch {
+      // error handled by request interceptor
+    } finally {
+      setFavLoading(false);
+    }
+  };
+
+  const handleToggleApply = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
+      onLoginClick?.();
+      return;
+    }
+    setAppLoading(true);
+    try {
+      const result = await toggleApplication({ announcementId: data.announcementId });
+      if (result === 'applied') {
+        setIsApplied(true);
+        setAppStatus('APPLIED');
+      } else if (result === 'removed') {
+        setIsApplied(false);
+        setAppStatus(null);
+      } else {
+        message.info('请在投递记录页面管理');
+      }
+      onStatusChange?.();
+    } catch {
+      // error handled by request interceptor
+    } finally {
+      setAppLoading(false);
+    }
   };
 
   const displayCities = data.cityNames.length > MAX_CITIES
@@ -59,10 +121,31 @@ export default function AnnouncementCard({ data }: AnnouncementCardProps) {
           </svg>
           截止: {dayjs(data.expiredAt).format('YYYY-MM-DD')}
         </span>
-        <span className={`${styles.badge} ${styles[`badge_${data.applyStatus}`] || ''}`}>
-          {data.applyStatus === 'ongoing' && <span className={styles.pulse} />}
-          {APPLY_STATUS_LABELS[data.applyStatus] || data.applyStatus}
-        </span>
+        <div className={styles.footerRight}>
+          <span
+            className={`${styles.actionIcon} ${isFavorited ? styles.favorited : ''}`}
+            onClick={handleFavorite}
+            style={{ opacity: favLoading ? 0.5 : 1 }}
+          >
+            {isFavorited ? <HeartFilled /> : <HeartOutlined />}
+          </span>
+          <span
+            className={`${styles.actionIcon} ${isApplied ? styles.applied : ''}`}
+            onClick={handleToggleApply}
+            style={{ opacity: appLoading ? 0.5 : 1 }}
+          >
+            {isApplied ? <CheckCircleFilled /> : <CheckCircleOutlined />}
+            {appStatus && appStatus !== 'APPLIED' && (
+              <span className={styles.appStatusLabel}>
+                {APPLICATION_STATUS_LABELS[appStatus as keyof typeof APPLICATION_STATUS_LABELS] || appStatus}
+              </span>
+            )}
+          </span>
+          <span className={`${styles.badge} ${styles[`badge_${data.applyStatus}`] || ''}`}>
+            {data.applyStatus === 'ongoing' && <span className={styles.pulse} />}
+            {APPLY_STATUS_LABELS[data.applyStatus] || data.applyStatus}
+          </span>
+        </div>
       </div>
     </div>
   );

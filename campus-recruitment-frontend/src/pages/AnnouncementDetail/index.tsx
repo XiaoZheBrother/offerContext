@@ -1,17 +1,28 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Breadcrumb, Tag, Button, Modal, Skeleton, Empty, message } from 'antd';
-import { CopyOutlined, LinkOutlined } from '@ant-design/icons';
+import { CopyOutlined, LinkOutlined, HeartFilled, HeartOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { getAnnouncementDetail } from '@/services/announcement';
 import { recordClick, recordPageView } from '@/services/tracking';
+import { addFavorite, removeFavorite } from '@/services/favorites';
+import { useUserAuthStore } from '@/store/userAuthStore';
+import LoginModal from '@/components/LoginModal';
+import RecordApplicationModal from '@/components/RecordApplicationModal';
+import { APPLICATION_STATUS_LABELS } from '@/types/user';
 import { APPLY_STATUS_LABELS, APPLY_STATUS_COLORS, CLICK_TYPE, ROUTES } from '@/utils/constants';
 import styles from './index.module.css';
 
 export default function AnnouncementDetail() {
   const { id } = useParams();
   const [emailModalOpen, setEmailModalOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [recordModalOpen, setRecordModalOpen] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favLoading, setFavLoading] = useState(false);
+  const { user } = useUserAuthStore();
+  const queryClient = useQueryClient();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['announcementDetail', id],
@@ -20,10 +31,37 @@ export default function AnnouncementDetail() {
   });
 
   useEffect(() => {
+    if (data) {
+      setIsFavorited(data.isFavorited || false);
+    }
+  }, [data]);
+
+  useEffect(() => {
     if (id) {
       recordPageView(window.location.href, 'detail', document.referrer);
     }
   }, [id]);
+
+  const handleFavorite = async () => {
+    if (!user) {
+      setLoginOpen(true);
+      return;
+    }
+    if (!data) return;
+    setFavLoading(true);
+    try {
+      if (isFavorited) {
+        await removeFavorite(data.announcementId);
+        setIsFavorited(false);
+      } else {
+        await addFavorite(data.announcementId);
+        setIsFavorited(true);
+      }
+      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+    } finally {
+      setFavLoading(false);
+    }
+  };
 
   const handleApply = () => {
     if (!data?.fromUrl) return;
@@ -32,7 +70,8 @@ export default function AnnouncementDetail() {
       setEmailModalOpen(true);
       recordClick(data.announcementId, CLICK_TYPE.EMAIL);
     } else {
-      window.open(data.fromUrl, '_blank', 'noopener,noreferrer');
+      // 弹出投递记录选择
+      setRecordModalOpen(true);
       recordClick(data.announcementId, CLICK_TYPE.LINK);
     }
   };
@@ -80,6 +119,10 @@ export default function AnnouncementDetail() {
     data.acceptWorkExperience !== null ? { label: '接受有工作经验', value: data.acceptWorkExperience ? '是' : '否' } : null,
   ].filter(Boolean) as { label: string; value: string }[];
 
+  const applyButtonText = data.isApplied
+    ? `已投递${data.applicationStatus && data.applicationStatus !== 'APPLIED' ? ` - ${APPLICATION_STATUS_LABELS[data.applicationStatus as keyof typeof APPLICATION_STATUS_LABELS] || data.applicationStatus}` : ''} - 前往投递`
+    : '前往投递';
+
   return (
     <div className={styles.page}>
       <Breadcrumb
@@ -93,7 +136,7 @@ export default function AnnouncementDetail() {
       <div className={styles.content}>
         <div className={styles.header}>
           <div className={styles.companyName}>{data.companyName}</div>
-          <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <span className={styles.announcementName}>{data.name}</span>
             <Tag
               className={styles.statusTag}
@@ -101,6 +144,14 @@ export default function AnnouncementDetail() {
             >
               {APPLY_STATUS_LABELS[data.applyStatus] || data.applyStatus}
             </Tag>
+            <Button
+              type="text"
+              size="small"
+              icon={isFavorited ? <HeartFilled style={{ color: '#e11d48' }} /> : <HeartOutlined />}
+              onClick={handleFavorite}
+              loading={favLoading}
+              style={{ marginLeft: 4 }}
+            />
           </div>
         </div>
 
@@ -211,7 +262,7 @@ export default function AnnouncementDetail() {
             onClick={handleApply}
             disabled={isExpired || !data.fromUrl}
           >
-            {isExpired ? '该校招已截止' : '前往投递'}
+            {isExpired ? '该校招已截止' : applyButtonText}
           </Button>
           {data.link && (
             <Button
@@ -226,6 +277,7 @@ export default function AnnouncementDetail() {
         </div>
       </div>
 
+      {/* 邮箱投递弹窗 */}
       <Modal
         title="邮箱投递"
         open={emailModalOpen}
@@ -240,6 +292,23 @@ export default function AnnouncementDetail() {
           </Button>
         </div>
       </Modal>
+
+      {/* 登录弹窗 */}
+      <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} onSuccess={() => queryClient.invalidateQueries({ queryKey: ['announcementDetail', id] })} />
+
+      {/* 投递记录弹窗 */}
+      {data.fromUrl && !data.fromUrl.includes('@') && (
+        <RecordApplicationModal
+          open={recordModalOpen}
+          onClose={() => setRecordModalOpen(false)}
+          announcementId={data.announcementId}
+          announcementName={data.name}
+          applyLink={data.fromUrl}
+          isApplied={data.isApplied || false}
+          applicationStatus={data.applicationStatus}
+          onSuccess={() => queryClient.invalidateQueries({ queryKey: ['announcementDetail', id] })}
+        />
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@ package com.campus.recruitment.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,6 +16,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -24,8 +26,19 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+                // 认证相关接口放行
+                .requestMatchers("/auth/**").permitAll()
+                // C端接口放行
+                .requestMatchers("/announcements/**").permitAll()
+                .requestMatchers("/click-logs", "/page-logs").permitAll()
+                // 管理端登录放行
                 .requestMatchers("/admin/login").permitAll()
-                .requestMatchers("/admin/**").authenticated()
+                // 用户功能需要USER角色
+                .requestMatchers("/favorites/**").hasRole("USER")
+                .requestMatchers("/applications/**").hasRole("USER")
+                // 管理端需要ADMIN角色
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                // 其余放行
                 .anyRequest().permitAll()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

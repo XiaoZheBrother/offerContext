@@ -32,4 +32,8 @@ public class AnnouncementDetailResponse {
     private Boolean acceptWorkExperience;
     private List<String> companyDescriptions;
     private List<String> companyIndustryNames;
+    // 2.0 用户态字段
+    private Boolean isFavorited = false;
+    private Boolean isApplied = false;
+    private String applicationStatus;
 }

@@ -11,6 +11,10 @@ export interface AnnouncementListResponse {
   applyStatus: ApplyStatus;
   onlineStatus: number;
   createdAt: string;
+  // 2.0 用户态字段
+  isFavorited?: boolean;
+  isApplied?: boolean;
+  applicationStatus?: string | null;
 }
 
 export interface AnnouncementDetailResponse {
@@ -40,6 +44,10 @@ export interface AnnouncementDetailResponse {
   acceptWorkExperience: boolean;
   companyDescriptions: string[];
   companyIndustryNames: string[];
+  // 2.0 用户态字段
+  isFavorited?: boolean;
+  isApplied?: boolean;
+  applicationStatus?: string | null;
 }
 
 export interface FilterItem {

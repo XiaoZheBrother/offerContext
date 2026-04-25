@@ -12,3 +12,12 @@ spring:
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:86400000}
+  user-secret: ${JWT_USER_SECRET}
+  user-expiration: ${JWT_USER_EXPIRATION:604800000}
+
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
