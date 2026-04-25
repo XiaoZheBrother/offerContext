@@ -4,6 +4,7 @@ import SiteHeader from '@/components/SiteHeader';
 import AdminLayout from '@/components/AdminLayout';
 import AnnouncementList from '@/pages/AnnouncementList';
 import AnnouncementDetail from '@/pages/AnnouncementDetail';
+import AuthVerify from '@/pages/AuthVerify';
 import Favorites from '@/pages/Favorites';
 import Applications from '@/pages/Applications';
 import Login from '@/pages/admin/Login';
@@ -34,6 +35,7 @@ const router = createBrowserRouter([
       { path: '/', element: <Navigate to="/announcements" replace /> },
       { path: '/announcements', element: <AnnouncementList /> },
       { path: '/announcements/:id', element: <AnnouncementDetail /> },
+      { path: '/auth/verify', element: <AuthVerify /> },
       { path: '/favorites', element: <Favorites /> },
       { path: '/applications', element: <Applications /> },
       { path: '/admin/login', element: <Login /> },

@@ -27,3 +27,20 @@ spring:
       host: 127.0.0.1
       port: 6379
       timeout: 3000ms
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: 958117002@qq.com
+    password: lrhwrihqycjbbfgh
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+app:
+  mail:
+    from: "校招信息汇总 <958117002@qq.com>"
+    base-url: http://localhost:3000

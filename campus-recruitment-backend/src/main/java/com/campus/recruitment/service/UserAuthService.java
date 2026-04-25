@@ -29,6 +29,7 @@ public class UserAuthService {
     private final UserRepository userRepository;
     private final StringRedisTemplate redisTemplate;
     private final RateLimitService rateLimitService;
+    private final EmailService emailService;
     private final SecretKey userSecretKey;
     private final long userJwtExpiration;
 
@@ -37,11 +38,13 @@ public class UserAuthService {
     public UserAuthService(UserRepository userRepository,
                            StringRedisTemplate redisTemplate,
                            RateLimitService rateLimitService,
+                           EmailService emailService,
                            @Value("${jwt.user-secret}") String userJwtSecret,
                            @Value("${jwt.user-expiration}") long userJwtExpiration) {
         this.userRepository = userRepository;
         this.redisTemplate = redisTemplate;
         this.rateLimitService = rateLimitService;
+        this.emailService = emailService;
         this.userSecretKey = Keys.hmacShaKeyFor(userJwtSecret.getBytes(StandardCharsets.UTF_8));
         this.userJwtExpiration = userJwtExpiration;
     }
@@ -68,8 +71,10 @@ public class UserAuthService {
                 TimeUnit.MINUTES
         );
 
-        // 开发模式：直接返回token；生产环境：发送邮件
-        return new SendMagicLinkResponse("已发送登录链接到您的邮箱", token);
+        // 发送邮件
+        emailService.sendMagicLinkEmail(email, token);
+
+        return new SendMagicLinkResponse("已发送登录链接到您的邮箱", null);
     }
 
     /**
