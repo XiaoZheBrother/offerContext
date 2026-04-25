@@ -89,3 +89,31 @@
 .resetBtn:hover {
   color: var(--navy);
 }
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+  .filterBar {
+    padding: 14px 14px 12px;
+  }
+
+  .filterRow {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .filterGroup,
+  .searchItem {
+    min-width: 100%;
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .filterGroup {
+    min-width: 140px;
+  }
+
+  .searchItem {
+    min-width: 200px;
+  }
+}

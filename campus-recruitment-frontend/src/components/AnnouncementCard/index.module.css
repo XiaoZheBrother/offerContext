@@ -239,3 +239,24 @@
   font-size: 11px;
   font-weight: 600;
 }
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+  .card {
+    height: auto;
+    min-height: 200px;
+  }
+
+  .cardBody {
+    padding: 16px 16px 0 16px;
+  }
+
+  .announcementName {
+    font-size: 15px;
+    min-height: auto;
+  }
+
+  .footer {
+    padding: 10px 16px;
+  }
+}

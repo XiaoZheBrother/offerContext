@@ -15,6 +15,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -44,6 +47,8 @@ public class AnnouncementService {
     private final AnnouncementJobCategoryRepository announcementJobCategoryRepository;
     private final CompanyDescriptionRepository companyDescriptionRepository;
     private final CompanyIndustryTypeRepository companyIndustryTypeRepository;
+    private final FavoriteRepository favoriteRepository;
+    private final ApplicationRecordRepository applicationRecordRepository;
 
     public AnnouncementService(AnnouncementRepository announcementRepository,
                                CompanyRepository companyRepository,
@@ -60,7 +65,9 @@ public class AnnouncementService {
                                AnnouncementIndustryTypeRepository announcementIndustryTypeRepository,
                                AnnouncementJobCategoryRepository announcementJobCategoryRepository,
                                CompanyDescriptionRepository companyDescriptionRepository,
-                               CompanyIndustryTypeRepository companyIndustryTypeRepository) {
+                               CompanyIndustryTypeRepository companyIndustryTypeRepository,
+                               FavoriteRepository favoriteRepository,
+                               ApplicationRecordRepository applicationRecordRepository) {
         this.announcementRepository = announcementRepository;
         this.companyRepository = companyRepository;
         this.cityRepository = cityRepository;
@@ -77,6 +84,25 @@ public class AnnouncementService {
         this.announcementJobCategoryRepository = announcementJobCategoryRepository;
         this.companyDescriptionRepository = companyDescriptionRepository;
         this.companyIndustryTypeRepository = companyIndustryTypeRepository;
+        this.favoriteRepository = favoriteRepository;
+        this.applicationRecordRepository = applicationRecordRepository;
+    }
+
+    private Long getCurrentUserId() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() == null) {
+            return null;
+        }
+        boolean isUser = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_USER"));
+        if (!isUser) {
+            return null;
+        }
+        try {
+            return Long.valueOf(auth.getPrincipal().toString());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     public PageResponse<AnnouncementListResponse> getAnnouncementList(AnnouncementQueryRequest request) {
@@ -133,6 +159,26 @@ public class AnnouncementService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+
+        // Set user-state fields (isFavorited, isApplied, applicationStatus)
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId != null) {
+            Set<Integer> favoritedIds = favoriteRepository.findAnnouncementIdsByUserId(currentUserId);
+            Map<Integer, String> applicationStatusMap = applicationRecordRepository
+                    .findByUserIdOrderByAppliedAtDesc(currentUserId).stream()
+                    .collect(Collectors.toMap(
+                            ApplicationRecord::getAnnouncementId,
+                            r -> r.getStatus().name(),
+                            (a, b) -> a
+                    ));
+
+            for (AnnouncementListResponse dto : list) {
+                dto.setIsFavorited(favoritedIds.contains(dto.getAnnouncementId()));
+                String appStatus = applicationStatusMap.get(dto.getAnnouncementId());
+                dto.setIsApplied(appStatus != null);
+                dto.setApplicationStatus(appStatus);
+            }
+        }
 
         return PageResponse.of(list, page.getTotalElements(), request.getPage(), request.getPageSize());
     }
@@ -219,6 +265,19 @@ public class AnnouncementService {
 
         // JobCategories
         response.setJobCategoryNames(fetchJobCategoryNames(announcement.getAnnouncementId()));
+
+        // Set user-state fields (isFavorited, isApplied, applicationStatus)
+        Long currentUserId = getCurrentUserId();
+        if (currentUserId != null) {
+            response.setIsFavorited(favoriteRepository.existsByUserIdAndAnnouncementId(currentUserId, announcement.getAnnouncementId()));
+            ApplicationRecord appRecord = applicationRecordRepository
+                    .findByUserIdAndAnnouncementId(currentUserId, announcement.getAnnouncementId())
+                    .orElse(null);
+            if (appRecord != null) {
+                response.setIsApplied(true);
+                response.setApplicationStatus(appRecord.getStatus().name());
+            }
+        }
 
         return response;
     }

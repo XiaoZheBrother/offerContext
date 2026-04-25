@@ -76,3 +76,43 @@
   padding: 64px 0;
   text-align: center;
 }
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+  .page {
+    padding: 16px 12px 32px;
+  }
+
+  .statsBar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .statChip {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+
+  .statNum {
+    font-size: 13px;
+  }
+
+  .grid,
+  .skeletonGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .pagination {
+    margin-top: 20px;
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .grid,
+  .skeletonGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}

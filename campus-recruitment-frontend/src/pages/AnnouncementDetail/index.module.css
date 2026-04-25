@@ -172,3 +172,43 @@
   padding: 64px 0;
   text-align: center;
 }
+
+/* Mobile responsive */
+@media (max-width: 767px) {
+  .page {
+    padding: 12px 12px 32px;
+  }
+
+  .content {
+    padding: 20px 16px;
+  }
+
+  .companyName {
+    font-size: 11px;
+  }
+
+  .announcementName {
+    font-size: 20px;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+    gap: 10px 0;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .applyButton,
+  .linkButton {
+    width: 100%;
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .content {
+    padding: 24px 20px;
+  }
+}
