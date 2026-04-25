@@ -66,7 +66,7 @@ npm run dev
 - 后台：http://localhost:5173/admin
 - API：http://localhost:8080/api
 - 默认管理员：admin / admin123
-- C端用户：通过 Magic Link 邮箱登录（开发模式直接返回 token）
+- C端用户：通过 Magic Link 邮箱登录（QQ 邮箱发送登录链接）
 
 ## 核心功能
 
@@ -100,7 +100,7 @@ npm run dev
 | 动态筛选 | JPA Specification | 5维度独立可选，避免组合爆炸 |
 | 埋点写入 | @Async 异步 | 不阻塞 API 响应 |
 | 用户认证 | 双 JWT（管理端 + 用户端） | C端与管理端独立认证，互不干扰 |
-| Magic Link | Redis 存储 token（15min TTL） | 一次性使用，自动过期，无需额外持久化 |
+| Magic Link | Redis 存储 token（15min TTL）+ QQ 邮箱 SMTP 发送 | 一次性使用，自动过期，无需额外持久化 |
 | 频率限制 | Redis 计数器 | 同邮箱 1次/分钟 10次/天，同 IP 5次/分钟 50次/天 |
 | 投递状态流转 | applied → written_test → interview → offer/rejected | 单向流转，已进入后续阶段不可 toggle 取消 |
 | 响应式 | CSS @media 查询 | 避免引入 Tailwind 与 Ant Design 样式冲突 |

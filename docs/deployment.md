@@ -70,6 +70,9 @@ mvn clean package -DskipTests
 | `REDIS_HOST` | Redis 地址 | `127.0.0.1` |
 | `REDIS_PORT` | Redis 端口 | `6379` |
 | `REDIS_PASSWORD` | Redis 密码 | 空（无密码则不设） |
+| `MAIL_USERNAME` | SMTP 邮箱账号 | `958117002@qq.com` |
+| `MAIL_PASSWORD` | SMTP 授权码 | QQ邮箱生成的授权码 |
+| `APP_BASE_URL` | 前端基础URL | `https://your-domain.com` |
 
 ### 3. 启动服务
 
@@ -107,6 +110,9 @@ Environment=JWT_SECRET=your-admin-jwt-secret-key-at-least-32-chars
 Environment=JWT_USER_SECRET=your-user-jwt-secret-key-at-least-32-chars
 Environment=REDIS_HOST=127.0.0.1
 Environment=REDIS_PORT=6379
+Environment=MAIL_USERNAME=958117002@qq.com
+Environment=MAIL_PASSWORD=your-mail-authorization-code
+Environment=APP_BASE_URL=https://your-domain.com
 
 [Install]
 WantedBy=multi-user.target
@@ -231,8 +237,13 @@ curl http://localhost:8080/api/announcements/filter-options
 
 Redis 不可用时，/auth/send-magic-link 接口返回"登录服务暂时不可用，请稍后重试"，其他功能不受影响。
 
-### Magic Link 开发模式
+### 邮件服务
 
-开发环境下（spring.profiles=dev），`POST /auth/send-magic-link` 接口直接在响应中返回生成的 token，无需发送邮件。前端会显示 token 供手动复制到验证接口测试。
+Magic Link 登录通过 QQ 邮箱 SMTP 发送登录链接，邮件包含品牌 Logo + 登录按钮 + 15分钟有效提示。
 
-生产环境需对接邮件服务（2.1 计划），将 `UserAuthService.sendMagicLink()` 中的 token 返回替换为邮件发送逻辑。
+生产环境需配置：
+- `MAIL_USERNAME`：QQ 邮箱账号
+- `MAIL_PASSWORD`：QQ 邮箱 SMTP 授权码（在 QQ 邮箱设置 → 账户 → POP3/SMTP 服务中生成）
+- `APP_BASE_URL`：前端域名，用于拼接邮件中的登录链接（如 `https://your-domain.com`）
+
+邮件发送为异步执行（`@Async`），不阻塞 API 响应。

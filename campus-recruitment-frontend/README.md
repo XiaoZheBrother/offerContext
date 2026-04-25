@@ -32,6 +32,7 @@ src/
 │   ├── AnnouncementDetail/ # 公告详情（含收藏/投递）
 │   ├── Favorites.tsx       # 我的收藏
 │   ├── Applications.tsx    # 投递记录
+│   ├── AuthVerify.tsx      # Magic Link 邮件验证回调页
 │   └── admin/              # 后台管理页面
 ├── services/         # API 调用封装（auth, favorites, applications, announcement, tracking）
 ├── store/            # Zustand 状态管理（auth 管理端, userAuthStore 用户端）
@@ -83,7 +84,7 @@ npm run preview
 - 公告列表：卡片网格布局（桌面3列/平板2列/手机1列响应式）
 - 多维筛选：毕业年份 / 招聘批次 / 城市 / 投递状态 / 关键词搜索
 - 公告详情：完整信息展示 + 投递按钮 + 收藏按钮
-- **用户登录**：Magic Link 邮箱无密码登录（开发模式直接返回 token）
+- **用户登录**：Magic Link 邮箱无密码登录（QQ 邮箱发送登录链接，/auth/verify 自动验证跳转）
 - **收藏**：卡片/详情页一键收藏，"我的收藏"页按截止时间排序高亮
 - **投递记录**：卡片投递开关 + 详情页投递记录弹窗 + 投递记录管理页
 - 筛选状态持久化：URL searchParams 驱动，支持分享/收藏

@@ -7,6 +7,7 @@
 - **Java 17** + **Spring Boot 3.2.0**
 - **Spring Data JPA** + Hibernate（MySQL 5.7）
 - **Spring Data Redis**（Magic Link Token + 频率限制）
+- **Spring Boot Mail** + QQ 邮箱 SMTP（Magic Link 邮件发送）
 - **Spring Security** + 双 JWT（管理端 + 用户端 jjwt 0.12.x）
 - **AntiSamy** XSS 防护
 - **Lombok**
@@ -37,7 +38,7 @@ src/main/java/com/campus/recruitment/
 ├── enums/                    # 枚举（ApplicationStatus: APPLIED/WRITTEN_TEST/INTERVIEW/OFFER/REJECTED）
 ├── exception/                # 异常处理
 ├── repository/               # JPA Repository
-├── service/                  # 业务逻辑
+├── service/                  # 业务逻辑（含 EmailService 邮件发送）
 └── util/                     # 工具类（XssUtils, UrlValidator, IpUtil）
 ```
 
@@ -64,6 +65,16 @@ spring:
     redis:
       host: 127.0.0.1
       port: 6379
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: <your-qq-email>
+    password: <your-smtp-authorization-code>
+
+app:
+  mail:
+    from: "校招信息汇总 <<your-qq-email>>"
+    base-url: http://localhost:3000
 ```
 
 JWT 密钥在 `application.yml` 中配置，生产环境务必通过环境变量覆盖。
@@ -110,7 +121,7 @@ java -jar target/campus-recruitment-backend-1.0.0-SNAPSHOT.jar --spring.profiles
 | GET | /announcements | 公告列表（支持筛选/分页，登录后返回收藏/投递状态） |
 | GET | /announcements/{id} | 公告详情（登录后返回收藏/投递状态） |
 | GET | /announcements/filter-options | 筛选选项 |
-| POST | /auth/send-magic-link | 发送 Magic Link 登录邮件（开发模式直接返回 token） |
+| POST | /auth/send-magic-link | 发送 Magic Link 登录邮件（QQ 邮箱 SMTP） |
 | GET | /auth/verify?token=xxx | 验证 Magic Link，获取 JWT |
 | POST | /auth/logout | 退出登录 |
 | GET | /auth/me | 获取当前用户信息 |
@@ -153,7 +164,7 @@ java -jar target/campus-recruitment-backend-1.0.0-SNAPSHOT.jar --spring.profiles
 ## 关键设计
 
 - **双 JWT 体系**：管理端 JWT（role=ADMIN, 24h）+ 用户端 JWT（role=USER, 7天），统一由 JwtAuthenticationFilter 处理
-- **Magic Link 登录**：邮箱发送 → Redis 存储 token（15min TTL）→ 验证后创建/查找用户 → 生成 JWT
+- **Magic Link 登录**：邮箱发送（QQ 邮箱 SMTP，HTML 模板，@Async 异步） → Redis 存储 token（15min TTL）→ 验证后创建/查找用户 → 生成 JWT
 - **频率限制**：同邮箱 1次/分钟 10次/天，同 IP 5次/分钟 50次/天，基于 Redis 计数器
 - **投递状态流转**：applied → written_test → interview → offer/rejected，单向不可逆
 - **公告列表用户态**：列表/详情接口通过 SecurityContext 获取当前用户，批量查询收藏和投递状态，避免 N+1
