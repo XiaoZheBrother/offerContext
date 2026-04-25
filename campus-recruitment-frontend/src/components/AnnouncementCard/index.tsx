@@ -126,6 +126,7 @@ export default function AnnouncementCard({ data, onLoginClick, onStatusChange }:
             className={`${styles.actionIcon} ${isFavorited ? styles.favorited : ''}`}
             onClick={handleFavorite}
             style={{ opacity: favLoading ? 0.5 : 1 }}
+            title={isFavorited ? '取消收藏' : '收藏'}
           >
             {isFavorited ? <HeartFilled /> : <HeartOutlined />}
           </span>
@@ -133,6 +134,7 @@ export default function AnnouncementCard({ data, onLoginClick, onStatusChange }:
             className={`${styles.actionIcon} ${isApplied ? styles.applied : ''}`}
             onClick={handleToggleApply}
             style={{ opacity: appLoading ? 0.5 : 1 }}
+            title={isApplied ? '重置为未投递' : '标记为已投递'}
           >
             {isApplied ? <CheckCircleFilled /> : <CheckCircleOutlined />}
             {appStatus && appStatus !== 'APPLIED' && (

@@ -150,6 +150,7 @@ export default function AnnouncementDetail() {
               icon={isFavorited ? <HeartFilled style={{ color: '#e11d48' }} /> : <HeartOutlined />}
               onClick={handleFavorite}
               loading={favLoading}
+              title={isFavorited ? '取消收藏' : '收藏'}
               style={{ marginLeft: 4 }}
             />
           </div>

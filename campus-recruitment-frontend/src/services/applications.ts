@@ -7,21 +7,26 @@ import type {
 } from '@/types/application';
 
 export async function toggleApplication(data: ApplicationToggleRequest): Promise<string> {
-  return request.post('/applications/toggle', data);
+  const res = await request.post('/applications/toggle', data);
+  return res.data;
 }
 
 export async function createApplication(data: ApplicationCreateRequest): Promise<ApplicationRecord> {
-  return request.post('/applications', data);
+  const res = await request.post('/applications', data);
+  return res.data as ApplicationRecord;
 }
 
 export async function getApplications(): Promise<ApplicationRecord[]> {
-  return request.get('/applications');
+  const res = await request.get('/applications');
+  return res.data as ApplicationRecord[];
 }
 
 export async function updateApplication(id: number, data: ApplicationUpdateRequest): Promise<ApplicationRecord> {
-  return request.put(`/applications/${id}`, data);
+  const res = await request.put(`/applications/${id}`, data);
+  return res.data as ApplicationRecord;
 }
 
 export async function deleteApplication(id: number): Promise<string> {
-  return request.delete(`/applications/${id}`);
+  const res = await request.delete(`/applications/${id}`);
+  return res.data;
 }

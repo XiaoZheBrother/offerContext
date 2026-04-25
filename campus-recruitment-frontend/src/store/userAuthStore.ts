@@ -21,7 +21,18 @@ const USER_KEY = 'user_info';
 function getStoredAuth() {
   const token = localStorage.getItem(TOKEN_KEY);
   const userStr = localStorage.getItem(USER_KEY);
-  const user = userStr ? JSON.parse(userStr) : null;
+  let user = null;
+  try {
+    user = userStr ? JSON.parse(userStr) : null;
+  } catch {
+    localStorage.removeItem(USER_KEY);
+  }
+  // Validate stored data
+  if (!token || token === 'undefined' || token === 'null' || !user || !user.id) {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+    return { token: null, user: null };
+  }
   return { token, user };
 }
 
